@@ -1,0 +1,70 @@
+bool isExist(int *c1, int *c2, int size, int newC1, int newC2) {
+    if (size == 0)
+        return false;
+    
+    if (c1[size-1] == newC1 && c2[size-1] == newC2)
+        return true;
+        
+    return false;
+}
+
+bool isInterleave(char* s1, char* s2, char* s3) {
+    if (strlen(s1) + strlen(s2) != strlen(s3))
+        return false;
+    if (strcmp(s1, s3) == 0 || strcmp(s2, s3) == 0)
+        return true;
+    if (strlen(s1) == 0 || strlen(s2) == 0)
+        return false;
+    
+    int size = 100;
+    int **c1 = malloc(2 * sizeof(int*));
+    int **c2 = malloc(2 * sizeof(int*));
+    c1[0] = calloc(size, sizeof(int));
+    c1[1] = calloc(size, sizeof(int));
+    c2[0] = calloc(size, sizeof(int));
+    c2[1] = calloc(size, sizeof(int));
+    int pre = 0;
+    int prevNum = 0;
+    int i = 0;
+    int j, newNum, now;
+    int s1Len = strlen(s1);
+    int s2Len = strlen(s2);
+    int s3Len = strlen(s3);
+
+    c1[0][0] = 0;
+    c2[0][0] = 0;
+    prevNum += 1;
+
+    while (prevNum > 0 && i < s3Len) {
+        j = 0;
+        newNum = 0;
+        now = (pre + 1) % 2;
+        while (j < prevNum) {
+            // Try concat with s1
+            if (c1[pre][j] < s1Len && s3[i] == s1[c1[pre][j]]) {
+                if (isExist(c1[now], c2[now], newNum, c1[pre][j] + 1, c2[pre][j]) == false) {
+                    c1[now][newNum] = c1[pre][j] + 1;
+                    c2[now][newNum] = c2[pre][j];
+                    newNum += 1;
+                }
+            }
+            // Try concat with s2
+            if (c2[pre][j] < s2Len &&  s3[i] == s2[c2[pre][j]]) {
+                if (isExist(c1[now], c2[now], newNum, c1[pre][j], c2[pre][j] + 1) == false) {
+                    c1[now][newNum] = c1[pre][j];
+                    c2[now][newNum] = c2[pre][j] + 1;
+                    newNum += 1;
+                }
+            }
+            j += 1;
+        }
+        pre = now;
+        prevNum = newNum;
+        i += 1;
+    }
+
+    if (prevNum == 0)
+        return false;
+
+    return true;
+}
