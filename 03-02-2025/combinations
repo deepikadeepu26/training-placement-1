@@ -1,0 +1,77 @@
+int getCombinationNumber(int n, int k)
+{
+  int ret = 1;
+  for (int i = 1; i <= k; i++)
+  {
+    ret *= (n - i + 1);
+    ret /= (i);
+  }
+  return ret;
+}
+
+void traverse(int n, int k, int *sample, int sampleIndex, int **ans, int *ansIndex)
+{
+
+  if (sampleIndex == 0)
+  {
+    // the first one
+    for (int i = 1; i <= n - k + 1; i++)
+    {
+      if (k == 1)
+      {
+        int *newAns = (int *)malloc(sizeof(int));
+        newAns[0] = i;
+        ans[(*ansIndex)] = newAns;
+        (*ansIndex) = (*ansIndex) + 1;
+      }
+      else
+      {
+        sample[0] = i;
+        traverse(n, k, sample, 1, ans, ansIndex);
+      }
+    }
+  }
+  else if (sampleIndex == k - 1)
+  {
+    // process ans
+    for (int i = sample[k - 2] + 1; i <= n; i++)
+    {
+      sample[k - 1] = i;
+      int *newAns = (int *)malloc(sizeof(int) * k);
+      for (int j = 0; j < k; j++)
+      {
+        newAns[j] = sample[j];
+      }
+      ans[(*ansIndex)] = newAns;
+      (*ansIndex) = (*ansIndex) + 1;
+    }
+  }
+  else
+  {
+    for (int i = sample[sampleIndex - 1] + 1; i <= n - k + 1 + sampleIndex; i++)
+    {
+      sample[sampleIndex] = i;
+      traverse(n, k, sample, sampleIndex + 1, ans, ansIndex);
+    }
+  }
+}
+
+int **combine(int n, int k, int *returnSize, int **returnColumnSizes)
+{
+  int ansSize = getCombinationNumber(n, k);
+  (*returnSize) = ansSize;
+  (*returnColumnSizes) = (int *)malloc(sizeof(int) * ansSize);
+  for (int i = 0; i < ansSize; i++)
+  {
+    (*returnColumnSizes)[i] = k;
+  }
+
+  int index = 0;
+
+  int **ans = (int **)malloc(sizeof(int *) * ansSize);
+  bzero(ans, sizeof(int *) * ansSize);
+  int *sampleArray = (int *)malloc(sizeof(int) * k);
+  traverse(n, k, sampleArray, 0, ans, &index);
+
+  return ans;
+}
