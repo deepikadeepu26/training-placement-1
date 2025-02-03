@@ -1,0 +1,87 @@
+/**
+ * Return an array of arrays of size *returnSize.
+ * The sizes of the arrays are returned as *returnColumnSizes array.
+ * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().
+ */
+struct node{
+    int* val;
+    struct node* next;
+    int size;
+};
+typedef struct _stack{
+    struct node* top;
+    int size;
+}Stack;
+void push(Stack* stack,int* subset,int subsetSize){
+    //create a copy of the subset
+    int* copy=malloc(subsetSize*sizeof(int));
+    for(int i=0;i<subsetSize;i++){
+        copy[i]=subset[i];
+    }
+    //create a new node to store the copy
+    struct node* newNode=malloc(sizeof(struct node));
+    newNode->val=copy;
+    newNode->next=stack->top;
+    newNode->size=subsetSize;
+    stack->top=newNode;
+    stack->size++;
+}
+int* pop(Stack* stack){
+    stack->size--;
+    int* subset=stack->top->val;
+    stack->top=stack->top->next;
+    return subset;
+}
+void backtrack(Stack* stack,int* subset,int subsetSize,int* nums,int numsSize,int start){
+    push(stack,subset,subsetSize);
+    for(int i=start;i<numsSize;i++){
+        if(i>start && nums[i]==nums[i-1]) continue; //i>start ensures duplicate elements are no added when recursion is folding up
+        subset[subsetSize]=nums[i]; //if i==start, the duplicate elements are added to subset for first time
+        backtrack(stack,subset,subsetSize+1,nums,numsSize,i+1);
+    }
+}
+void quicksort(int* array,int startIndex,int endIndex){
+    if(startIndex>=endIndex){
+        return;
+    }
+    //partition to get pivot
+    int pivot=startIndex;
+    int temp;
+    //push all elements<=end to left of the pivot, then swap pivot and end
+    for(int i=startIndex;i<=endIndex-1;i++){
+        if(array[i]<=array[endIndex]){
+            //swap i and pivot
+            temp=array[i];
+            array[i]=array[pivot];
+            array[pivot]=temp;
+            //move pivot 1 step right
+            pivot++;
+        }
+    }
+    temp=array[pivot];
+    array[pivot]=array[endIndex];
+    array[endIndex]=temp;
+    //sort the left and right halves recursively
+    quicksort(array,startIndex,pivot-1);
+    quicksort(array,pivot+1,endIndex);
+}
+int** subsetsWithDup(int* nums, int numsSize, int* returnSize, int** returnColumnSizes) {
+    //create a stack to store all subsets
+    Stack stack;
+    stack.top=NULL;stack.size=0;
+    //create an empty temporary subset
+    int* subset=malloc(numsSize*sizeof(int));
+    //sort the nums array to exclude subsets with same elements but in different order
+    quicksort(nums,0,numsSize-1);
+    //push all possible subsets into stack using the recursive backtrack function
+    backtrack(&stack,subset,0,nums,numsSize,0);
+    //store in return array
+    *returnSize=stack.size;
+    int** returnArray=malloc(*returnSize*sizeof(int*));
+    *returnColumnSizes=malloc(*returnSize*sizeof(int));
+    for(int i=0;i<*returnSize;i++){
+        *(*returnColumnSizes+i)=(stack.top)->size;
+        returnArray[i]=pop(&stack);
+    }
+    return returnArray;
+}
