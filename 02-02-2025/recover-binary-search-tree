@@ -1,0 +1,33 @@
+void swap(struct TreeNode* node1, struct TreeNode* node2) {
+    int temp = node1->val;
+    node1->val = node2->val;
+    node2->val = temp;
+}
+void inorder(struct TreeNode* root, struct TreeNode** lastVisitedNode, struct TreeNode** outOfOrderNode1, struct TreeNode** outOfOrderNode2) {
+    if (!root) {
+        return;
+    }
+
+    inorder(root->left, lastVisitedNode, outOfOrderNode1, outOfOrderNode2);
+    
+    if (!*outOfOrderNode1 && *lastVisitedNode && (*lastVisitedNode)->val > root->val) {
+        *outOfOrderNode1 = *lastVisitedNode;
+    }
+
+    if (*outOfOrderNode1 && (*outOfOrderNode1)->val > root->val) {
+        *outOfOrderNode2 = root;
+    }
+    
+    *lastVisitedNode = root;
+    inorder(root->right, lastVisitedNode, outOfOrderNode1, outOfOrderNode2);
+}
+
+void recoverTree(struct TreeNode* root) {
+    struct TreeNode* lastVisitedNode = NULL;
+    struct TreeNode* outOfOrderNode1 = NULL;
+    struct TreeNode* outOfOrderNode2 = NULL;
+    inorder(root, &lastVisitedNode, &outOfOrderNode1, &outOfOrderNode2);
+    if (outOfOrderNode1 && outOfOrderNode2) {
+        swap(outOfOrderNode1, outOfOrderNode2);
+    }
+}
