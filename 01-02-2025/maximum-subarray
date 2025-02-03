@@ -1,0 +1,13 @@
+#define MAX(a,b) (a>b?a:b)
+
+int maxSubArray(int* nums, int numsSize){
+    int best = INT_MIN;
+    int sumarr = 0;
+    for (int i=0; i<numsSize; i++)
+    {
+        sumarr = MAX(sumarr+nums[i], nums[i]);
+        best = MAX(best, sumarr);
+    }
+
+    return best;
+}
