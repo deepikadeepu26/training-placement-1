@@ -1,0 +1,14 @@
+int removeDuplicates(int* nums, int numsSize) {
+    int seen[256]={0};
+    int count=0;
+
+    for(int i=0;i<numsSize;i++)
+    {
+        if(seen[(unsigned char)nums[i]]==0 || seen[(unsigned char)nums[i]]==1)
+        {
+            seen[(unsigned char)nums[i]]++;
+            nums[count++]=nums[i];
+        }
+    }
+    return count;
+}
