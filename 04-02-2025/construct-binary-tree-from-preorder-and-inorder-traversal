@@ -1,0 +1,75 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+void traversal(int * preorder, int * preorder_index, int * inorder, int inorder_min_index, int inorder_max_index, struct TreeNode ** prev_ptr, struct TreeNode ** root, bool left)
+{
+    if(inorder_min_index <= inorder_max_index)
+    {
+        int search_num = preorder[*preorder_index];
+        *preorder_index += 1;
+        int i=0;
+        for(i=inorder_min_index; i <= inorder_max_index; i++)
+        {
+                if(search_num == inorder[i])
+                {
+                    break;
+                }
+        }
+
+        struct TreeNode * new_node = (struct TreeNode *)malloc(sizeof(struct TreeNode));
+        new_node->val = inorder[i];
+        new_node->left = NULL;
+        new_node->right = NULL;
+
+        if(*prev_ptr == NULL)    //Root of the tree
+        {
+            
+            *root = new_node;
+            *prev_ptr = new_node;
+        }
+        else
+        {
+            if(left)
+            {
+                (*prev_ptr)->left = new_node;
+            }
+            else
+            {
+                (*prev_ptr)->right = new_node;
+            }
+        }
+
+        //Left Subtree
+        int left_min_index = inorder_min_index;
+        int left_max_index = i-1;
+        *prev_ptr = new_node;
+        traversal(preorder, preorder_index, inorder, left_min_index, left_max_index, prev_ptr, root, true);
+
+        //Right Subtree
+        int right_min_index = i+1;
+        int right_max_index = inorder_max_index;
+        *prev_ptr = new_node;
+        traversal(preorder, preorder_index, inorder, right_min_index, right_max_index, prev_ptr, root, false);
+    }
+    else
+    {
+        return;
+    }
+}
+
+struct TreeNode* buildTree(int* preorder, int preorderSize, int* inorder, int inorderSize) 
+{
+    int preorder_index = 0;
+    int inorder_max_index = inorderSize - 1;
+    int inorder_min_index = 0;
+    struct TreeNode * new_root = NULL;
+    struct TreeNode * prev_ptr = NULL;
+
+    traversal(preorder, &preorder_index, inorder, inorder_min_index, inorder_max_index, &prev_ptr, &new_root, false);    
+    return new_root;
+}
