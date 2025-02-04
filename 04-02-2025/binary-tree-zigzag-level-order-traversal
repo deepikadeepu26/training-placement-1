@@ -1,0 +1,174 @@
+
+typedef struct QNODE_T
+{
+    struct TreeNode *n;
+
+    struct QNODE_T *pNext;
+} QNODE, *PQNODE;
+
+typedef struct QUEUE_T
+{
+    PQNODE pHead;
+    int size;
+} QUEUE, *PQUEUE;
+
+// enqueue
+// returns newHead;
+void enqueue(PQUEUE pQ, struct TreeNode *n)
+{   
+    if(n == NULL)
+    {
+        return;
+    }
+    PQNODE pNode = (PQNODE)malloc(sizeof(QNODE));
+    if(pNode == NULL)
+    {
+        return;
+    }
+
+    pNode->n = n;
+    pNode->pNext = pQ->pHead;
+
+    pQ->pHead = pNode;
+    pQ->size++;
+
+    //printf("enqueue %u , size = %d \n", id, pQ->size);
+}
+
+// dequeue
+PQNODE dequeue(PQUEUE pQ)
+{
+    PQNODE pNode = pQ->pHead;
+
+    //printf("dequeue size = %d \n", pQ->size);
+
+    if(pQ->size == 0)
+    {
+        return NULL;
+    }
+
+    if(pQ->size == 1)
+    {
+        
+        pQ->size--;
+        pQ->pHead = NULL;
+
+        return pNode;
+    }
+
+    while(pNode->pNext->pNext != NULL)
+    {
+        pNode = pNode->pNext;
+    }
+
+    // pNode point to 1 before last element
+    PQNODE pLast = pNode->pNext;
+    pQ->size--;
+    pNode->pNext = NULL;
+    return pLast;
+
+}
+
+int qSize(PQUEUE pQ)
+{
+    return pQ->size;
+}
+
+
+
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+/**
+ * Return an array of arrays of size *returnSize.
+ * The sizes of the arrays are returned as *returnColumnSizes array.
+ * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().
+ */
+
+void swap(int *a, int *b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void reverse(int *arr, int len)
+{
+    int left = 0;
+    int right = len -1;
+
+    while(right > left)
+    {
+        swap(arr + right, arr + left);
+        right--;
+        left++;
+    }
+
+}
+
+
+int** zigzagLevelOrder(struct TreeNode* root, int* returnSize, int** returnColumnSizes)
+{
+    int **ppLevels = (int**)malloc(2000 * sizeof(int*));
+    int *pLevelsSizes = (int*)malloc(2000 * sizeof(int));
+    int levelsWrite = 0;
+
+    // for each level we reach we open a new level
+
+    // traverse level by level, using a queue
+    // and reverse the output to form the zigzag
+    QUEUE q;
+    q.size = 0;
+    q.pHead = NULL;
+
+    enqueue(&q, root);
+
+    while(qSize(&q) > 0)
+    {
+        int currLevelSize = qSize(&q);
+        // allocate new level array
+
+        ppLevels[levelsWrite] = (int*)malloc(sizeof(int) * 2000);
+        pLevelsSizes[levelsWrite] = 0;
+
+        // for each node on the q add all children
+        int levelSize = currLevelSize;
+        while(levelSize > 0)
+        {
+            PQNODE pN = dequeue(&q);
+            ppLevels[levelsWrite][pLevelsSizes[levelsWrite]] = pN->n->val;
+            pLevelsSizes[levelsWrite]++;
+
+            enqueue(&q, pN->n->left);
+            enqueue(&q, pN->n->right);
+
+            levelSize--;
+        }
+
+        levelsWrite++;
+
+    }
+
+
+    // now reverse odd index levels
+    int levels = levelsWrite;
+    for(int i = 0 ; i < levels ; i++)
+    {
+        if(i % 2 == 1)
+        {
+            reverse(ppLevels[i], pLevelsSizes[i]);
+        }
+    }
+
+
+    *returnSize = levelsWrite;
+    *returnColumnSizes = pLevelsSizes;
+
+    return ppLevels;
+}
